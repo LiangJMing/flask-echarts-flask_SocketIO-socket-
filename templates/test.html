@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html style="height: 100%">
+   <head>
+       <meta charset="utf-8">
+   </head>
+
+   <body style="height: 100%; margin: 0">
+       <div id="main" style="width: 600px;height:600px;"></div>
+       <div id="container" style="height: 100%"></div>
+       <script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/echarts.min.js"></script>
+       <script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts-gl/echarts-gl.min.js"></script>
+       <script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts-stat/ecStat.min.js"></script>
+       <script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/extension/dataTool.min.js"></script>
+       <script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/map/js/china.js"></script>
+       <script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/map/js/world.js"></script>
+       <script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/extension/bmap.min.js"></script>
+       <script type="text/javascript" src="//cdn.bootcss.com/jquery/3.1.1/jquery.min.js"></script>
+       <script type="text/javascript" src="//cdn.bootcss.com/socket.io/1.5.1/socket.io.min.js"></script>
+       <script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/simplex.js"></script>
+       <script type="text/javascript">
+var dom = document.getElementById("container");
+var main = document.getElementById("main");
+var myChart = echarts.init(main);
+var app = {};
+option = null;
+var symbolSize = 1;
+var data = [];
+
+myChart.setOption ({
+    title: {
+        text: '外轮廓图'
+    },
+    tooltip: {
+        triggerOn: 'none',
+        formatter: function (params) {
+            return 'X: ' + params.data[0].toFixed(2) + '<br>Y: ' + params.data[1].toFixed(2);
+        }
+    },
+    grid: {
+    },
+    xAxis: {
+        min: 0,
+        max: 570,
+        type: 'value',
+        axisLine: {onZero: false}
+    },
+    yAxis: {
+        min: 0,
+        max: 570,
+        type: 'value',
+        axisLine: {onZero: false}
+    },
+    dataZoom: [
+        {
+            type: 'slider',
+            xAxisIndex: 0,
+            filterMode: 'empty'
+        },
+        {
+            type: 'slider',
+            yAxisIndex: 0,
+            filterMode: 'empty'
+        },
+        {
+            type: 'inside',
+            xAxisIndex: 0,
+            filterMode: 'empty'
+        },
+        {
+            type: 'inside',
+            yAxisIndex: 0,
+            filterMode: 'empty'
+        }
+    ],
+    series: [
+        {
+            id: 'a',
+            type: 'line',
+            smooth: true,
+            symbolSize: symbolSize,
+            data: data
+        }
+    ]
+});
+
+var update_mychart = function (res) {
+    //res是json格式的response对象
+
+        // 隐藏加载动画
+        myChart.hideLoading();
+
+        // 准备数据
+        data = res.data;
+        // 填入数据
+        myChart.setOption({
+        series: [{
+            id: 'a',
+            data: data
+        }]
+    });
+
+    };
+
+myChart.showLoading();
+$(document).ready(function() {
+    namespace = '/test';
+    var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port + namespace);
+
+    socket.on('server_response', function(res) {
+        update_mychart(res);
+    });
+
+});
+       </script>
+   </body>
+</html>
